@@ -1,0 +1,26 @@
+name: Test application
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install -r backend/requirements.txt httpx
+      - run: python -m compileall -q backend
+      - run: python -m unittest discover -s backend/tests -v
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: cd frontend && npm install
+      - run: cd frontend && npm run build
