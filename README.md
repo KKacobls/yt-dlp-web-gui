@@ -9,7 +9,7 @@
 - WebSocket 即時更新進度、下載速度、剩餘時間、處理狀態
 - 可設定「下載完成後自動分割」，每份預設 **500 MB**；任務進行中（開始切割前）仍可修改大小
 - 各段 MP4 可以獨立播放、下載；提供重新分割與合併按鈕
-- 下載時間新到舊排序；SQLite 儲存歷史，支援暫停／繼續／取消／重試
+- 下載時間新到舊排序；SQLite 儲存歷史，支援取消／重試（可在來源允許時續傳）
 - Windows 一鍵從檔案總管開啟下載目錄
 - 不需要雲端帳號；預設僅監聽 127.0.0.1
 
@@ -73,7 +73,7 @@ npm run dev
 ```bash
 python -m compileall backend
 python -m unittest discover -s backend/tests -v
-cd frontend && npm ci && npm run build
+cd frontend && npm install && npm run build
 ```
 
 測試切割／合併需要系統裝有 FFmpeg；相關 CI 使用 GitHub Actions 進行驗證。
