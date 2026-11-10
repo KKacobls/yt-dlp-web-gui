@@ -11,6 +11,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from decoder import decode_to_memmap
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from opencc import OpenCC
@@ -67,6 +69,8 @@ def transcribe(jid):
     with LOCK:
         item = dict(JOBS[jid])
     model = None
+    audio = None
+    scratch = STORE / jid / "decoded.pcm"
     try:
         update(jid, status="processing", progress=1, message="載入模型，首次可能需下載…")
         model = WhisperModel(
@@ -77,9 +81,11 @@ def transcribe(jid):
             num_workers=1
         )
         media = STORE / jid / ("input" + item["extension"])
+        update(jid, message="FFmpeg 解碼音訊，略過 PyAV")
+        audio = decode_to_memmap(media, scratch)
         update(jid, message="正在使用 GPU 辨識")
         iterator, info = model.transcribe(
-            str(media), beam_size=5, language=LANG[item["language"]],
+            audio, beam_size=5, language=LANG[item["language"]],
             vad_filter=item["vad"], condition_on_previous_text=False
         )
         duration = float(info.duration or 0)
@@ -108,8 +114,10 @@ def transcribe(jid):
                detected_language=info.language, duration=duration,
                message="完成，可下載字幕")
     finally:
+        del audio
         del model
         gc.collect()
+        scratch.unlink(missing_ok=True)
         (STORE / jid / ("input" + item["extension"])).unlink(missing_ok=True)
 
 
@@ -128,6 +136,14 @@ def worker():
 
 @app.on_event("startup")
 def startup():
+    # Clean orphaned uploads after an unclean shutdown, including queued jobs.
+    # No worker is started yet, so nothing here is actively processing.
+    for folder in STORE.iterdir():
+        if not folder.is_dir():
+            continue
+        for source in folder.glob("input.*"):
+            source.unlink(missing_ok=True)
+        (folder / "decoded.pcm").unlink(missing_ok=True)
     for file in STORE.glob("*/job.json"):
         try:
             item = json.loads(file.read_text(encoding="utf-8"))
