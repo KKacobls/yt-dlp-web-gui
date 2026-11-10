@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Whisper 字幕工作站</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Microsoft JhengHei",sans-serif;background:#0b1220;color:#e2e8f0}*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:28px 14px}main{max-width:850px;margin:auto}h1{font-size:28px;margin:0 0 8px}.sub{color:#94a3b8;margin-bottom:28px}.panel{border:1px solid #263449;background:#131f32;border-radius:18px;padding:24px;margin:16px 0}label{display:block;margin:16px 0 7px}input,select,button{font:inherit}input[type=file]{width:100%;border:2px dashed #64748b;border-radius:12px;padding:26px;background:#0f172a}select{background:#0f172a;border:1px solid #475569;color:#fff;padding:10px;border-radius:9px;width:100%}.options{display:grid;grid-template-columns:1fr 1fr;gap:16px}.check{display:flex;align-items:center;gap:8px}button{background:#38bdf8;border:0;border-radius:10px;color:#07121d;font-weight:700;padding:12px 20px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.job{border:1px solid #334155;padding:16px;border-radius:12px;margin:14px 0;background:#0f172a}.meta{font-size:13px;color:#94a3b8}progress{width:100%;height:12px;margin:12px 0}a{display:inline-block;color:#7dd3fc;margin:5px 12px 0 0}pre{white-space:pre-wrap;max-height:360px;overflow:auto;background:#07111e;padding:12px;border-radius:8px;font-size:13px}.err{color:#fca5a5}#notice{margin:12px 0;color:#7dd3fc}@media(max-width:550px){.options{grid-template-columns:1fr}}
+</style></head>
+<body><main><h1>🎙️ Whisper 字幕工作站</h1>
+<div class="sub">使用 NVIDIA GPU 辨識影片語音，下載 SRT / TXT / VTT。單工作佇列，適合共用伺服器。</div>
+<section class="panel">
+<form id="form">
+<label for="file">影片或音訊</label><input id="file" name="file" type="file" accept="video/*,audio/*,.mkv,.m4a,.opus" required>
+<div class="options"><div><label for="model">模型</label><select name="model" id="model"><option>small</option><option>medium</option><option>large-v3</option><option>turbo</option></select></div>
+<div><label for="lang">語言</label><select id="lang" name="language"><option value="auto">自動辨識</option><option value="zh">中文</option><option value="ja">日文</option><option value="en">英文</option><option value="ko">韓文</option></select></div></div>
+<label class="check"><input name="vad" type="checkbox" value="true" checked>過濾無人聲片段</label>
+<button id="send" type="submit">開始上傳並辨識</button><div id="notice" role="status"></div>
+</form></section>
+<section class="panel"><h2>工作紀錄</h2><div id="jobs">載入中…</div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const escapeHTML=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let previewed=new Set();
+const api=async(url,opts)=>{const r=await fetch(url,opts);if(!r.ok){let body=await r.json().catch(()=>({}));throw Error(body.detail||("HTTP "+r.status))}return r.json()};
+function render(list){
+let root=$("#jobs");if(!list.length){root.textContent="目前沒有工作";return}
+root.innerHTML=list.map(j=>{let id=encodeURIComponent(j.id),name=escapeHTML(j.filename);
+let done=j.status==="done",failed=j.status==="failed";
+return '<article class="job"><strong>'+name+'</strong><div class="meta">'+escapeHTML(j.model)+' ｜ '+escapeHTML(j.status)+' ｜ '+escapeHTML(j.message)+'</div>'+
+'<progress max="100" value="'+Number(j.progress||0)+'"></progress>'+
+'<div class="meta">'+Number(j.progress||0)+'% ｜ 已辨識 '+Number(j.segments||0)+' 段</div>'+
+(failed?'<p class="err">'+escapeHTML(j.error)+'</p>':'')+
+(done?'<div><a href="/api/jobs/'+id+'/download/srt">下載 SRT</a><a href="/api/jobs/'+id+'/download/txt">下載 TXT</a><a href="/api/jobs/'+id+'/download/vtt">下載 VTT</a> <button class="preview" data-id="'+id+'">預覽文字</button></div><pre id="p-'+id+'" hidden></pre>':'')+'</article>'}).join("");
+for(const b of document.querySelectorAll(".preview"))b.onclick=async()=>{let id=b.dataset.id,el=document.getElementById("p-"+id);if(!previewed.has(id)){try{let r=await api("/api/jobs/"+id+"/preview");el.textContent=r.text;previewed.add(id)}catch(e){el.textContent=e.message}}el.hidden=!el.hidden};
+}
+async function refresh(){try{render(await api("/api/jobs"))}catch(e){$("#jobs").textContent="載入失敗："+e.message}}
+$("#form").onsubmit=async(e)=>{e.preventDefault();let btn=$("#send"),note=$("#notice");btn.disabled=true;note.textContent="正在上傳影片…";
+let f=new FormData(e.target);f.set("vad",$("#form [name=vad]").checked?"true":"false");
+try{await api("/api/jobs",{method:"POST",body:f});note.textContent="上傳成功，已排入 GPU 工作佇列";$("#file").value="";await refresh()}catch(err){note.textContent="錯誤："+err.message}finally{btn.disabled=false}};
+refresh();setInterval(refresh,2500);
+</script></body></html>
