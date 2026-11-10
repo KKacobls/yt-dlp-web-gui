@@ -2,8 +2,9 @@ fastapi>=0.115,<1
 uvicorn>=0.32,<1
 python-multipart>=0.0.20,<1
 faster-whisper>=1.1,<2
-# faster-whisper 1.2.1 uses av.open(metadata_errors=...), removed in newer PyAV.
-av==17.1.0
+# Decode with FFmpeg directly: avoids PyAV metadata_errors incompatibilities.
+imageio-ffmpeg>=0.6,<1
+numpy>=1.26,<3
 opencc-python-reimplemented>=0.1.7,<1
 nvidia-cublas-cu12
 nvidia-cudnn-cu12>=9,<10
