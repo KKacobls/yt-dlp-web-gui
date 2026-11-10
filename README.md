@@ -15,7 +15,7 @@
 
 ## Windows 11 快速開始
 
-1. 安裝 [Python 3.11+](https://www.python.org/downloads/)、[Node.js 20+](https://nodejs.org/)。
+1. 安裝 Python 3.12（Windows 啟動腳本固定使用 Python 3.12，避免新版本缺少預編譯套件）、[Node.js 20+](https://nodejs.org/)。
 2. 以 PowerShell 安裝 FFmpeg：`winget install --id Gyan.FFmpeg -e`，安裝後重新開啟終端機，確認 `ffmpeg -version`、`ffprobe -version` 均能執行。
 3. 下載本 Repository，解壓縮後，**雙擊 `start.bat`**。首次執行會建立 Python 虛擬環境、安裝套件、建置前端。
 4. 瀏覽器會開啟 [http://127.0.0.1:8765](http://127.0.0.1:8765)。
@@ -27,7 +27,7 @@
 後端（第一個終端機）：
 
 ```powershell
-py -3 -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 .\.venv\Scripts\python.exe -m uvicorn app:app --app-dir backend --host 127.0.0.1 --port 8765 --reload
 ```
@@ -76,3 +76,21 @@ cd frontend && npm install && npm run build
 ```
 
 測試切割／合併需要系統裝有 FFmpeg；相關 CI 使用 GitHub Actions 進行驗證。
+
+## Windows：PyYAML / Microsoft Visual C++ Build Tools 安裝失敗
+
+若舊版啟動腳本將 Python 3.15 當成預設版本，安裝 `uvicorn[standard]` 可能在編譯 PyYAML 時失敗。
+新版改用 `uvicorn` + `websockets`，並固定使用 Python 3.12，無須安裝 Visual C++ Build Tools。
+
+先執行 `py -3.12 --version`；如果找不到，執行 `winget install -e --id Python.Python.3.12`。
+
+已使用 ZIP 安裝的使用者，在原專案目錄更新啟動腳本與套件清單：
+
+```powershell
+cd "$HOME\yt-dlp-web-gui-main"
+Invoke-WebRequest "https://raw.githubusercontent.com/KKacobls/yt-dlp-web-gui/main/scripts/start.ps1" -OutFile ".\scripts\start.ps1"
+Invoke-WebRequest "https://raw.githubusercontent.com/KKacobls/yt-dlp-web-gui/main/backend/requirements.txt" -OutFile ".\backend\requirements.txt"
+.\start.bat
+```
+
+新版啟動腳本偵測到舊 `.venv` 使用錯誤的 Python 版本時，會自動刪除並重建**僅 `.venv`**，不會刪除 `data/` 的影片與紀錄。
