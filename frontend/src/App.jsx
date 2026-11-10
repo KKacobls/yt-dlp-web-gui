@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Download, Link2, CheckCircle2, Clock3, FolderOpen, Scissors, Layers, RotateCcw, Square, Play, ExternalLink, HardDrive, Activity, Settings, RefreshCcw, FileVideo, Wifi, WifiOff, Plus, X, Check, LoaderCircle } from 'lucide-react';
+import { Download, Link2, CheckCircle2, Clock3, FolderOpen, Scissors, Layers, RotateCcw, Square, Play, ExternalLink, HardDrive, Activity, Settings, RefreshCcw, FileVideo, Wifi, WifiOff, Plus, X, Check, LoaderCircle, Moon, Sun } from 'lucide-react';
 import './styles.css';
 
 const api = async (path, options={}) => {
@@ -112,8 +112,16 @@ export default function App(){
   const [filter,setFilter]=useState('all');
   const [loading,setLoading]=useState(false);
   const [toast,setToast]=useState(null);
+  const [theme,setTheme]=useState(() => document.documentElement.classList.contains('dark') ? 'dark' : 'light');
   const notice=useCallback((message,error=false)=>setToast({message,error}),[]);
   useEffect(()=>{if(!toast)return;const id=setTimeout(()=>setToast(null),4500);return()=>clearTimeout(id)},[toast]);
+  useEffect(()=>{
+    const dark = theme === 'dark';
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b1120' : '#f5f7fb');
+    try { localStorage.setItem('ytdlp-theme', theme); } catch {}
+  },[theme]);
   useEffect(()=>{
     api('/health').then(setHealth).catch(()=>{});
     api('/settings').then(setSettings).catch(()=>{});
@@ -163,7 +171,14 @@ export default function App(){
       <header className="flex items-center justify-between gap-2 mb-7">
         <div className="hidden lg:block text-xs text-slate-400">WORKSPACE / <span className="text-slate-700">{nav.find(n=>n[0]===page)?.[1]}</span></div>
         <div className="font-extrabold text-lg lg:hidden">yt-dlp <span className="text-indigo-600">Studio</span></div>
-        <div className="flex items-center gap-3 text-xs font-semibold text-slate-500"><span className={'px-3 py-1.5 rounded-full '+(connected?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700')}>{connected?'● 系統已連線':'● 離線中'}</span><button className="icon-btn" onClick={()=>setPage('settings')}><Settings size={19}/></button></div>
+        <div className="flex items-center gap-2 sm:gap-3 text-xs font-semibold text-slate-500">
+          <span className={'hidden sm:inline-flex px-3 py-1.5 rounded-full '+(connected?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700')}>{connected?'● 系統已連線':'● 離線中'}</span>
+          <button type="button" className="btn-ghost !px-3 !py-2" aria-pressed={theme==='dark'} aria-label={theme==='dark'?'切換淺色模式':'切換深色模式'} title={theme==='dark'?'切換淺色模式':'切換深色模式'} onClick={()=>setTheme(current=>current==='dark'?'light':'dark')}>
+            {theme==='dark'?<Sun size={17}/>:<Moon size={17}/>}
+            <span>{theme==='dark'?'淺色模式':'深色模式'}</span>
+          </button>
+          <button className="icon-btn" aria-label="偏好設定" title="偏好設定" onClick={()=>setPage('settings')}><Settings size={19}/></button>
+        </div>
       </header>
       <div className="flex lg:hidden gap-2 mb-7">{nav.map(([key,label])=><button key={key} onClick={()=>setPage(key)} className={'btn !px-3 '+(page===key?'bg-indigo-600 text-white':'bg-white border text-slate-500')}>{label}</button>)}</div>
       <h1 className="font-extrabold text-3xl sm:text-4xl tracking-tight">{page==='settings'?'偏好設定':page==='history'?'下載紀錄':'你的下載工作台'}<span className="text-indigo-600">.</span></h1>
