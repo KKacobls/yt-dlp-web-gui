@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { font-family: Inter, 'Noto Sans TC', system-ui, sans-serif; color:#1b2540; background:#f5f7fb; font-synthesis:none; }
+body { margin:0; min-height:100vh; }
+button, input, select { font:inherit; }
+button { transition: all .16s ease; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+::selection { background:#dedafd; }
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-thumb { background:#d7daea; border-radius:10px; }
+.card { @apply bg-white border border-slate-200/75 rounded-2xl shadow-soft; }
+.field { @apply w-full bg-white border border-slate-200 rounded-xl px-3.5 py-3 outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition; }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold text-sm; }
+.btn-primary { @apply btn bg-primary text-white hover:bg-violet-700; }
+.btn-ghost { @apply btn bg-white text-slate-600 border border-slate-200 hover:bg-slate-50; }
+.icon-btn { @apply rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800; }
+.progress-bg { @apply bg-slate-100 h-2 rounded-full overflow-hidden; }
+.progress-bar { @apply bg-primary h-full rounded-full transition-all duration-500; }
+.tab-active { @apply text-primary bg-violet-50; }
