@@ -20,3 +20,67 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 .progress-bg { @apply bg-slate-100 h-2 rounded-full overflow-hidden; }
 .progress-bar { @apply bg-primary h-full rounded-full transition-all duration-500; }
 .tab-active { @apply text-primary bg-violet-50; }
+
+/* Dark theme is scoped to the html element; the rest of the UI stays unchanged in light mode. */
+html.dark { color-scheme: dark; background-color: #0b1120; }
+html.dark body { background-color: #0b1120; color: #e7ebf5; }
+html.dark .card {
+  background-color: #172032;
+  border-color: #303c53;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, .15);
+}
+html.dark .field {
+  background-color: #111a2b;
+  border-color: #38465e;
+  color: #f1f5f9;
+}
+html.dark .field::placeholder { color: #8190a7; }
+html.dark .field:focus { border-color: #9385fb; --tw-ring-color: rgba(139, 129, 246, .3); }
+html.dark select option { color: #f1f5f9; background-color: #111a2b; }
+html.dark .btn-ghost { background-color: #222d42; color: #e2e8f0; border-color: #3a4860; }
+html.dark .btn-ghost:hover { background-color: #303b52; }
+html.dark .btn-primary { background-color: #6358db; }
+html.dark .btn-primary:hover { background-color: #776de9; }
+html.dark .icon-btn { color: #a5b4ca; }
+html.dark .icon-btn:hover { color: #f1f5f9; background-color: #2d3a52; }
+html.dark .progress-bg { background-color: #2c3950; }
+html.dark .progress-bar { background-color: #8c7bf9; }
+html.dark .tab-active { background-color: #30294e; color: #c4b5fd; }
+html.dark ::selection { background-color: #544a99; color: white; }
+html.dark ::-webkit-scrollbar-thumb { background-color: #485873; }
+
+/* Existing Tailwind utility colors used throughout the dashboard. */
+html.dark [class~="bg-white"] { background-color: #172032; }
+html.dark [class~="bg-slate-50"] { background-color: #111b2c; }
+html.dark [class~="bg-slate-100"] { background-color: #2a364c; }
+html.dark [class~="bg-indigo-50"] { background-color: #282849; }
+html.dark [class~="bg-violet-50"] { background-color: #2b254b; }
+html.dark [class~="bg-amber-50"] { background-color: #3c2c19; }
+html.dark [class~="bg-blue-50"] { background-color: #20334f; }
+html.dark [class~="bg-emerald-50"] { background-color: #193a33; }
+html.dark [class~="bg-rose-50"] { background-color: #422834; }
+html.dark [class~="bg-orange-50"] { background-color: #433020; }
+html.dark [class~="bg-gradient-to-br"] { background-image: linear-gradient(to bottom right, #322e58, #253457); }
+html.dark [class~="text-slate-900"] { color: #f5f7ff; }
+html.dark [class~="text-slate-800"] { color: #e8edf7; }
+html.dark [class~="text-slate-700"] { color: #d2dded; }
+html.dark [class~="text-slate-600"] { color: #b6c3d8; }
+html.dark [class~="text-slate-500"] { color: #a5b3c8; }
+html.dark [class~="text-slate-400"] { color: #8b9bb4; }
+html.dark [class~="text-indigo-600"] { color: #b0a5ff; }
+html.dark [class~="text-indigo-700"] { color: #c4b5fd; }
+html.dark [class~="text-indigo-500"] { color: #a5b4fc; }
+html.dark [class~="text-indigo-300"] { color: #9ba8e7; }
+html.dark [class~="text-amber-700"] { color: #fcd34d; }
+html.dark [class~="text-blue-700"] { color: #93c5fd; }
+html.dark [class~="text-emerald-700"] { color: #6ee7b7; }
+html.dark [class~="text-rose-700"] { color: #fda4af; }
+html.dark [class~="text-orange-700"] { color: #fdba74; }
+html.dark [class~="border-slate-100"],
+html.dark [class~="border-slate-200"],
+html.dark [class~="border-t"],
+html.dark [class~="border-r"],
+html.dark [class~="border"] { border-color: #303c53; }
+html.dark [class~="hover:bg-white"]:hover,
+html.dark [class~="hover:bg-slate-50"]:hover { background-color: #27334a; }
+html.dark [class~="hover:text-indigo-600"]:hover { color: #c4b5fd; }
